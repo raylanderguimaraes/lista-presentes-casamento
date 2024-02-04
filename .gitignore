@@ -1,0 +1,15 @@
+# Node.js
+node_modules/
+
+# Arquivos de configuração
+.env
+
+# Arquivos de log
+logs/
+*.log
+
+# Arquivos de ambiente de desenvolvimento
+.env.local
+
+# Arquivos de ambiente de produção
+.env.production
