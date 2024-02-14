@@ -1,5 +1,6 @@
 // configurar server
 const express = require("express");
+const cors = require("cors");
 const mongoose = require("mongoose");
 require("dotenv").config();
 require("./db/db");
@@ -7,8 +8,11 @@ const multer = require("multer");
 const path = require("path");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
 const app = express();
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT;
+app.use(cors());
+app.use("/src/uploads", express.static(path.resolve(__dirname, "uploads")));
 
 // FUNCAO PARA CHECAR E VALIDAR TOKEN
 const checkToken = (req, res, next) => {
@@ -30,7 +34,7 @@ const checkToken = (req, res, next) => {
 // CONFIGURACAO PARA ARMAZENAR IMAGEM DO PRESENTE NO SERVIDOR EM PASTA DE UPLOADS
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "src/uploads/");
+    cb(null, "./src/uploads/");
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + path.extname(file.originalname));
@@ -61,7 +65,7 @@ app.use(express.json());
 const presentSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String, required: true },
-  src: { type: String, required: true },
+  imageUrl: { type: String, required: true },
   chosenBy: {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -86,6 +90,14 @@ const userSchema = new mongoose.Schema({
 // DEFINIR MODELOS (LISTA PRESENTES E USUÁRIOS)
 const User = mongoose.model("User", userSchema);
 const Present = mongoose.model("Present", presentSchema);
+
+// app.get("/uploads/:filename", (req, res) => {
+//   const filename = req.params.filename;
+//   const filePath = path.join(__dirname, "uploads", filename);
+
+//   // Envie o arquivo como resposta
+//   res.sendFile(filePath);
+// });
 
 app.get("/presentes", async (req, res) => {
   try {
@@ -143,7 +155,7 @@ app.post("/presentes", checkToken, upload.single("file"), async (req, res) => {
     const newPresente = new Present({
       name,
       description,
-      src: file.path,
+      imageUrl: file.path.replace(/\\/g, "/"),
     });
     await newPresente.save();
     res.status(201).json({ message: "Presente adicionado com sucesso!" });
