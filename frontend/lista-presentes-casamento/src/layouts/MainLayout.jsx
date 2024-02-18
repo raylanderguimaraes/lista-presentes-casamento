@@ -4,7 +4,7 @@ export default function MainLayout({ children }) {
   return (
     <div className="  bg-custom-gradient min-h-screen">
       <Header />
-      {children}
+      <div className="pt-14">{children}</div>
       <Footer />
     </div>
   );
